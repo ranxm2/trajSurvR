@@ -1,0 +1,28 @@
+SampleID,UIDx,CollNum,Group,Sex,GenoGroup,CollAge,YrSinceOs,YrSinceCen,time_since_baseline,stop_time,event,delta_NEFL,delta_GPNMB,delta_CXCL13,NPX_NEFL,NPX_GPNMB,NPX_CXCL13,Y,CASE
+S_C01_1,C01,1,Control,Female,Other Genotype,42,NA,-6,0,6,0,0.10,-0.05,0.02,6.1,5.4,4.9,0,0
+S_C01_2,C01,2,Control,Female,Other Genotype,43,NA,-5,1,6,0,0.05,-0.01,0.03,6.0,5.3,4.8,0,0
+S_C01_3,C01,3,Control,Female,Other Genotype,44,NA,-4,2,6,0,0.03,0.00,0.01,5.9,5.2,4.8,0,0
+S_C02_1,C02,1,Control,Male,Other Genotype,50,NA,-6,0,6,0,0.08,-0.03,0.05,6.2,5.5,5.0,0,0
+S_C02_2,C02,2,Control,Male,Other Genotype,51,NA,-5,1,6,0,0.07,-0.02,0.03,6.1,5.5,4.9,0,0
+S_C02_3,C02,3,Control,Male,Other Genotype,52,NA,-4,2,6,0,0.04,-0.01,0.02,6.0,5.4,4.8,0,0
+S_C03_1,C03,1,Control,Female,C9orf72,47,NA,-6,0,6,0,0.06,-0.02,0.04,6.2,5.6,5.1,0,0
+S_C03_2,C03,2,Control,Female,C9orf72,48,NA,-5,1,6,0,0.05,-0.02,0.03,6.1,5.5,5.0,0,0
+S_C03_3,C03,3,Control,Female,C9orf72,49,NA,-4,2,6,0,0.04,-0.01,0.01,6.0,5.4,4.9,0,0
+S_P01_1,P01,1,Potential Convert,Male,SOD1 nonA4V,55,NA,-5,0,5,0,0.25,0.10,0.08,6.6,5.9,5.4,-2.5,0
+S_P01_2,P01,2,Potential Convert,Male,SOD1 nonA4V,56,NA,-4,1,5,0,0.30,0.11,0.09,6.7,6.0,5.5,-2.0,0
+S_P01_3,P01,3,Potential Convert,Male,SOD1 nonA4V,57,NA,-3,2,5,0,0.34,0.12,0.10,6.8,6.1,5.5,-1.8,0
+S_P02_1,P02,1,Potential Convert,Female,SOD1 A4V,53,NA,-6,0,5,0,0.20,0.08,0.07,6.4,5.8,5.3,-3.2,0
+S_P02_2,P02,2,Potential Convert,Female,SOD1 A4V,54,NA,-5,1,5,0,0.24,0.09,0.08,6.5,5.9,5.3,-2.8,0
+S_P02_3,P02,3,Potential Convert,Female,SOD1 A4V,55,NA,-4,2,5,0,0.27,0.10,0.09,6.6,6.0,5.4,-2.3,0
+S_P03_1,P03,1,Potential Convert,Male,C9orf72,46,NA,-5,0,5,0,0.18,0.06,0.06,6.3,5.7,5.2,-2.6,0
+S_P03_2,P03,2,Potential Convert,Male,C9orf72,47,NA,-4,1,5,0,0.20,0.08,0.07,6.4,5.8,5.2,-2.2,0
+S_P03_3,P03,3,Potential Convert,Male,C9orf72,48,NA,-3,2,5,0,0.22,0.09,0.08,6.5,5.9,5.3,-1.9,0
+S_V01_1,V01,1,Convert,Female,SOD1 A4V,49,-3,NA,0,3,1,0.40,0.15,0.12,7.0,6.3,5.8,-3.0,0
+S_V01_2,V01,2,Convert,Female,SOD1 A4V,50,-2,NA,1,3,1,0.55,0.18,0.14,7.3,6.5,6.0,-2.0,1
+S_V01_3,V01,3,Convert,Female,SOD1 A4V,51,-1,NA,2,3,1,0.70,0.22,0.18,7.6,6.8,6.3,-1.0,1
+S_V02_1,V02,1,Convert,Male,SOD1 nonA4V,58,-4,NA,0,4,1,0.38,0.14,0.11,6.9,6.2,5.7,-4.0,0
+S_V02_2,V02,2,Convert,Male,SOD1 nonA4V,59,-3,NA,1,4,1,0.48,0.17,0.13,7.1,6.4,5.9,-3.0,0
+S_V02_3,V02,3,Convert,Male,SOD1 nonA4V,60,-2,NA,2,4,1,0.62,0.20,0.16,7.4,6.7,6.2,-2.0,1
+S_V03_1,V03,1,Convert,Female,C9orf72,52,-3.5,NA,0,3.5,1,0.35,0.13,0.10,6.8,6.1,5.6,-3.5,0
+S_V03_2,V03,2,Convert,Female,C9orf72,53,-2.5,NA,1,3.5,1,0.45,0.16,0.12,7.0,6.3,5.8,-2.5,0
+S_V03_3,V03,3,Convert,Female,C9orf72,54,-1.5,NA,2,3.5,1,0.58,0.19,0.15,7.3,6.6,6.1,-1.5,1

@@ -1,0 +1,265 @@
+---
+title: "trajSurvR Demo"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{trajSurvR Demo}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", warning = FALSE, message = FALSE)
+```
+
+## Overview
+
+This vignette demonstrates the core workflow wrapped from the `raw/*.Rmd` analyses:
+
+1. QC  
+2. Differential analysis  
+3. Correlation study  
+4. Trajectory modeling  
+5. Time-to-event analysis (baseline Cox + LASSO Cox + time-dependent Cox)  
+6. Event prediction (logistic regression)  
+7. Time-of-onset prediction (regression with baseline)  
+8. Feature selection (LASSO + forward greedy)
+
+```{r load-pkg}
+if (!requireNamespace("trajSurvR", quietly = TRUE)) {
+  # Development mode (run inside repository before installation)
+  r_dir <- if (dir.exists("R")) "R" else "../R"
+  r_files <- list.files(r_dir, full.names = TRUE, pattern = "\\.R$")
+  invisible(lapply(r_files, source))
+} else {
+  library(trajSurvR)
+}
+```
+
+```{r load-data}
+example_df <- simulate_trajsurv_data(n_subjects = 180, n_visits = 4, seed = 2026, generic_feature_names = TRUE)
+head(example_df[, c("SampleID", "UIDx", "Group", "CollAge", "delta_001", "protein_001")])
+```
+
+## 1) QC
+
+```{r qc}
+# Build a synthetic long-format table to demonstrate QC function
+qc_long <- dplyr::tibble(
+  SampleID = rep(example_df$SampleID, 3),
+  Assay = rep(c("protein_001", "protein_002", "protein_003"), each = nrow(example_df)),
+  NPX = c(example_df$protein_001, example_df$protein_002, example_df$protein_003),
+  SampleQC = "PASS",
+  AssayQC = "PASS"
+)
+
+qc_res <- qc_olink_data(qc_long, missing_rate_threshold = 0.20)
+summarize_qc(qc_res)
+```
+
+## 2) Differential analysis
+
+```{r differential}
+proteins_npx <- c("protein_001", "protein_002", "protein_003")
+diff_res <- fit_differential_mixed_models(
+  analysis_df = example_df,
+  proteins = proteins_npx,
+  group_col = "Group",
+  constant_covariates = c("Sex", "GenoGroup"),
+  time_varying_covariates = c("CollAge", "Weight", "Height"),
+  id_col = "UIDx",
+  case_level = "Convert",
+  ref_level = "Control",
+  min_rows = 10
+)
+diff_res
+```
+
+```{r differential-plot, fig.width=7, fig.height=5}
+plot_differential_volcano(diff_res)
+```
+
+## 3) Correlation study
+
+```{r correlation}
+corr_res <- compute_correlation_study(example_df, proteins = proteins_npx, method = "pearson")
+corr_res$correlation_matrix
+```
+
+```{r correlation-plot, fig.width=6, fig.height=5}
+plot_correlation_heatmap(corr_res)
+```
+
+## 4) Trajectory modeling
+
+```{r trajectory}
+delta_wide <- example_df |>
+  dplyr::select(SampleID, delta_001, delta_002, delta_003)
+
+visit_design <- example_df |>
+  dplyr::filter(Group == "Convert") |>
+  dplyr::select(SampleID, UIDx, YrSinceOs, Sex, GenoGroup, CollAge, Weight, Height)
+
+traj_res <- run_trajectory_batch(
+  delta_wide = dplyr::filter(delta_wide, SampleID %in% visit_design$SampleID),
+  visit_design = visit_design,
+  proteins = c("delta_001", "delta_002"),
+  id_col = "UIDx",
+  time_col = "YrSinceOs",
+  constant_covariates = c("Sex", "GenoGroup"),
+  time_varying_covariates = c("CollAge", "Weight", "Height"),
+  min_obs = 5
+)
+traj_res$summary
+```
+
+```{r trajectory-plot, fig.width=7, fig.height=5}
+if ("delta_001" %in% names(traj_res$models)) {
+  plot_trajectory_fit(traj_res$models[["delta_001"]], time_col = "YrSinceOs")
+}
+```
+
+## 5) Time-to-event analysis (multi-model)
+
+```{r tte}
+protein_surv <- example_df |>
+  dplyr::select(SampleID, delta_001, delta_002, delta_003)
+
+surv_dat <- build_baseline_survival_data(
+  visit_info = example_df,
+  protein_wide = protein_surv,
+  sample_id_col = "SampleID",
+  id_col = "UIDx",
+  group_col = "Group",
+  converter_label = "Convert",
+  pre_converter_label = "Potential Convert",
+  onset_col = "YrSinceOs",
+  censor_col = "YrSinceCen",
+  constant_covariates = c("Sex", "GenoGroup"),
+  time_varying_covariates = c("CollAge", "Weight", "Height")
+)
+
+cox_uni <- fit_baseline_cox(
+  dat = surv_dat,
+  proteins = c("delta_001", "delta_002", "delta_003"),
+  constant_covariates = c("Sex", "GenoGroup"),
+  time_varying_covariates = c("CollAge", "Weight", "Height"),
+  min_rows = 8,
+  min_events = 2
+)
+cox_uni
+```
+
+```{r cox-plot, fig.width=7, fig.height=5}
+plot_cox_forest(cox_uni, top_n = 10)
+```
+
+```{r lasso-cox}
+if (nrow(surv_dat) >= 30) {
+  lasso_cox <- fit_lasso_cox(
+    dat = surv_dat,
+    proteins = c("delta_001", "delta_002", "delta_003"),
+    constant_covariates = c("Sex", "GenoGroup"),
+    time_varying_covariates = c("CollAge", "Weight", "Height"),
+    nfolds = 3
+  )
+  lasso_cox$selected_min
+} else {
+  cat("Example dataset is small; skipping LASSO Cox fit in this demo.\n")
+}
+```
+
+```{r td-cox}
+td_base <- example_df |>
+  dplyr::select(UIDx, time_since_baseline, stop_time, event, CollAge, Weight, Height, Sex, GenoGroup, delta_001, delta_002, delta_003)
+
+intervals <- make_counting_process_data(
+  visit_df = td_base,
+  id_col = "UIDx",
+  visit_time_col = "time_since_baseline",
+  stop_time_col = "stop_time",
+  event_col = "event",
+  keep_visit_cols = c("CollAge", "Weight", "Height", "Sex", "GenoGroup", "delta_001", "delta_002", "delta_003")
+)
+
+td_data <- intervals
+
+td_res <- fit_time_dependent_cox(
+  td_data = td_data,
+  proteins = c("delta_001", "delta_002"),
+  constant_covariates = c("Sex", "GenoGroup"),
+  time_varying_covariates = c("CollAge", "Weight", "Height"),
+  min_subjects = 5,
+  min_events = 2
+)
+td_res
+```
+
+```{r td-cox-plot, fig.width=7, fig.height=4.5}
+plot_cox_forest(td_res, top_n = 10)
+```
+
+## 6) Event prediction (logistic regression)
+
+```{r logistic}
+pred_dat <- make_event_outcome(example_df, horizon_years = 2, group_col = "Group", onset_col = "YrSinceOs") |>
+  dplyr::filter(!is.na(CASE))
+
+features <- c("delta_001", "delta_002", "CollAge")
+features <- c(features, "Weight", "Height", "Sex")
+auc_cv <- cv_logistic_auc(pred_dat, feature_cols = features, outcome_col = "CASE", n_folds = 3)
+auc_cv
+```
+
+## 7) Time-of-onset prediction (regression with baseline)
+
+```{r onset-regression}
+onset_dat <- example_df |>
+  dplyr::filter(Group %in% c("Potential Convert", "Convert")) |>
+  dplyr::mutate(Y = ifelse(is.na(Y), 0, Y))
+
+onset_fit <- fit_onset_time_regression(
+  data = onset_dat,
+  outcome_col = "Y",
+  feature_cols = c("delta_001", "delta_002"),
+  constant_covariates = c("Sex", "GenoGroup"),
+  time_varying_covariates = c("CollAge", "Weight", "Height"),
+  id_col = "UIDx"
+)
+onset_fit$metrics
+```
+
+```{r onset-plot, fig.width=6, fig.height=5}
+plot_onset_predictions(onset_fit)
+```
+
+## 8) Feature selection (LASSO + forward greedy)
+
+```{r fs}
+class_counts <- table(pred_dat$CASE)
+if (length(class_counts) == 2 && all(class_counts >= 2)) {
+  lasso_event <- fit_event_prediction_lasso(
+    data = pred_dat,
+    outcome_col = "CASE",
+    feature_cols = c("delta_001", "delta_002", "delta_003", "CollAge", "Weight", "Height"),
+    nfolds = 3
+  )
+  lasso_event$selected_min
+} else {
+  cat("Example dataset has too few cases/controls for logistic LASSO; skipping.\n")
+}
+
+greedy <- forward_greedy_selection(
+  data = pred_dat,
+  candidate_features = c("delta_001", "delta_002", "delta_003", "Weight", "Height"),
+  base_features = c("CollAge", "Sex"),
+  evaluator = function(dat, feats) cv_logistic_auc(dat, feature_cols = feats, outcome_col = "CASE", n_folds = 3),
+  min_improvement = 0
+)
+greedy$history
+```
+
+```{r greedy-plot, fig.width=7, fig.height=5}
+if (nrow(greedy$history) > 0) {
+  plot_greedy_history(greedy)
+}
+```
