@@ -61,7 +61,7 @@ cv_logistic_auc <- function(
 
   if (is.null(fold_col) || !fold_col %in% colnames(dat)) {
     set.seed(seed)
-    dat$Fold <- sample(rep(seq_len(n_folds), length.out = nrow(dat)))
+    dat$Fold <- base::sample(rep(seq_len(n_folds), length.out = nrow(dat)))
     fold_col <- "Fold"
   }
 

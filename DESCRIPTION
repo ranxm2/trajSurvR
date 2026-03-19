@@ -2,32 +2,36 @@ Package: trajSurvR
 Type: Package
 Title: Longitudinal Trajectory and Survival Analysis for Proteomic Data
 Version: 0.1.0
-Authors@R: 
-    person("Ran", "User", email = "ran@example.com", role = c("aut", "cre"))
-Description: Wraps longitudinal proteomic workflows from the project's raw R Markdown
-    analyses into reusable functions for quality control, differential analysis,
-    correlation study, trajectory modeling, time-to-event analysis, event
-    prediction, onset-time regression, and feature selection.
+Authors@R:
+    person("Ximing", "Ran", email = "ranxm2@users.noreply.github.com",
+           role = c("aut", "cre"))
+Description: Provides functions for longitudinal proteomic analysis workflows,
+    including quality control, differential expression via mixed-effects models,
+    correlation study, GAM/GAMM trajectory modeling, time-to-event analysis
+    (baseline Cox, LASSO Cox, time-dependent Cox), event prediction with
+    logistic regression, onset-time prediction, and forward greedy or LASSO
+    feature selection. A built-in simulation function and plotting helpers
+    support rapid prototyping and reporting.
 License: MIT + file LICENSE
+URL: https://github.com/ranxm2/trajSurvR
+BugReports: https://github.com/ranxm2/trajSurvR/issues
 Encoding: UTF-8
 RoxygenNote: 7.3.2
-Depends: 
+Depends:
     R (>= 4.1.0)
 Imports:
     stats,
     utils,
-    graphics,
-    grDevices,
     survival,
     mgcv,
     glmnet,
     dplyr,
     tidyr,
     lme4,
-    lmerTest,
-    pROC
-Suggests:
-    rmarkdown,
-    knitr,
+    pROC,
     ggplot2
+Suggests:
+    lmerTest,
+    rmarkdown,
+    knitr
 VignetteBuilder: knitr

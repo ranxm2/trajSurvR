@@ -1,20 +1,18 @@
 #' Plot differential-analysis volcano
 #'
 #' @param diff_result Output of \code{fit_differential_mixed_models()}.
-#' @param p_col P-value column.
-#' @param coef_col Coefficient column.
-#' @param fdr_col FDR column.
+#' @param p_col P-value column name.
+#' @param coef_col Coefficient column name.
+#' @param fdr_col FDR column name; used to colour significant points.
 #'
-#' @return A ggplot object.
+#' @return A \code{ggplot} object.
+#' @export
 plot_differential_volcano <- function(
   diff_result,
   p_col = "p_value",
   coef_col = "coef",
   fdr_col = "fdr"
 ) {
-  if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    stop("Please install 'ggplot2' to use plotting functions.")
-  }
   req <- c(p_col, coef_col)
   miss <- setdiff(req, colnames(diff_result))
   if (length(miss) > 0) stop("Missing columns: ", paste(miss, collapse = ", "))
@@ -36,14 +34,12 @@ plot_differential_volcano <- function(
 
 #' Plot correlation matrix heatmap
 #'
-#' @param corr_result Result from \code{compute_correlation_study()} (or raw matrix).
+#' @param corr_result Result from \code{compute_correlation_study()}, or a
+#'   numeric correlation matrix directly.
 #'
-#' @return A ggplot object.
+#' @return A \code{ggplot} object.
+#' @export
 plot_correlation_heatmap <- function(corr_result) {
-  if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    stop("Please install 'ggplot2' to use plotting functions.")
-  }
-
   cor_mat <- if (is.list(corr_result) && !is.null(corr_result$correlation_matrix)) {
     corr_result$correlation_matrix
   } else {
@@ -64,18 +60,16 @@ plot_correlation_heatmap <- function(corr_result) {
 #' Plot one trajectory fit
 #'
 #' @param trajectory_fit Result from \code{fit_trajectory_gam()}.
-#' @param time_col Time column in predictions.
+#' @param time_col Time column name in the predictions data frame.
 #'
-#' @return A ggplot object.
+#' @return A \code{ggplot} object.
+#' @export
 plot_trajectory_fit <- function(trajectory_fit, time_col = "YrSinceOs") {
-  if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    stop("Please install 'ggplot2' to use plotting functions.")
-  }
   if (is.null(trajectory_fit) || is.null(trajectory_fit$predictions) || is.null(trajectory_fit$data)) {
-    stop("trajectory_fit must be output from fit_trajectory_gam().")
+    stop("trajectory_fit must be the output of fit_trajectory_gam().")
   }
 
-  dat <- trajectory_fit$data
+  dat  <- trajectory_fit$data
   pred <- trajectory_fit$predictions
 
   ggplot2::ggplot() +
@@ -83,8 +77,7 @@ plot_trajectory_fit <- function(trajectory_fit, time_col = "YrSinceOs") {
     ggplot2::geom_ribbon(
       data = pred,
       ggplot2::aes(x = .data[[time_col]], ymin = .data$lower, ymax = .data$upper),
-      alpha = 0.2,
-      fill = "grey40"
+      alpha = 0.2, fill = "grey40"
     ) +
     ggplot2::geom_line(data = pred, ggplot2::aes(x = .data[[time_col]], y = .data$fit), linewidth = 1) +
     ggplot2::geom_hline(yintercept = 0, linetype = "dashed", color = "grey50") +
@@ -93,24 +86,23 @@ plot_trajectory_fit <- function(trajectory_fit, time_col = "YrSinceOs") {
 }
 
 
-#' Plot Cox model coefficients as a forest-style dot plot
+#' Forest-style dot plot of Cox model hazard ratios
 #'
-#' @param cox_result Output from \code{fit_baseline_cox()} or \code{fit_time_dependent_cox()}.
-#' @param hr_col Hazard-ratio column.
-#' @param protein_col Feature/protein column.
-#' @param top_n Number of rows to display.
+#' @param cox_result Output from \code{fit_baseline_cox()} or
+#'   \code{fit_time_dependent_cox()}.
+#' @param hr_col Hazard-ratio column name.
+#' @param protein_col Feature/protein label column name.
+#' @param top_n Maximum number of features to display.
 #'
-#' @return A ggplot object.
+#' @return A \code{ggplot} object.
+#' @export
 plot_cox_forest <- function(
   cox_result,
-  hr_col = "HR",
+  hr_col      = "HR",
   protein_col = "Protein",
-  top_n = 20
+  top_n       = 20
 ) {
-  if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    stop("Please install 'ggplot2' to use plotting functions.")
-  }
-  req <- c(hr_col, protein_col)
+  req  <- c(hr_col, protein_col)
   miss <- setdiff(req, colnames(cox_result))
   if (length(miss) > 0) stop("Missing columns: ", paste(miss, collapse = ", "))
 
@@ -135,11 +127,9 @@ plot_cox_forest <- function(
 #'
 #' @param greedy_result Output from \code{forward_greedy_selection()}.
 #'
-#' @return A ggplot object.
+#' @return A \code{ggplot} object.
+#' @export
 plot_greedy_history <- function(greedy_result) {
-  if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    stop("Please install 'ggplot2' to use plotting functions.")
-  }
   if (is.null(greedy_result$history) || nrow(greedy_result$history) == 0) {
     stop("greedy_result has empty history.")
   }
@@ -158,13 +148,11 @@ plot_greedy_history <- function(greedy_result) {
 #'
 #' @param onset_fit Output from \code{fit_onset_time_regression()}.
 #'
-#' @return A ggplot object.
+#' @return A \code{ggplot} object.
+#' @export
 plot_onset_predictions <- function(onset_fit) {
-  if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    stop("Please install 'ggplot2' to use plotting functions.")
-  }
   if (is.null(onset_fit$loocv_predictions)) {
-    stop("onset_fit must contain loocv_predictions.")
+    stop("onset_fit must contain a loocv_predictions element.")
   }
 
   df <- onset_fit$loocv_predictions |>
@@ -173,6 +161,7 @@ plot_onset_predictions <- function(onset_fit) {
   ggplot2::ggplot(df, ggplot2::aes(x = .data$y_pred, y = .data$y_true)) +
     ggplot2::geom_point(alpha = 0.8) +
     ggplot2::geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "grey40") +
-    ggplot2::labs(x = "Predicted onset time", y = "Observed onset time", title = "Onset prediction performance") +
+    ggplot2::labs(x = "Predicted onset time", y = "Observed onset time",
+                  title = "Onset prediction performance") +
     ggplot2::theme_bw()
 }

@@ -57,36 +57,36 @@ generate_example_data <- function(
 
   groups <- rep(c("Control", "Potential Convert", "Convert"), length.out = n_subjects)
   uid <- sprintf("U%04d", seq_len(n_subjects))
-  sex <- sample(c("Male", "Female"), n_subjects, replace = TRUE)
-  geno <- sample(c("Other Genotype", "SOD1 A4V", "SOD1 nonA4V", "C9orf72"), n_subjects, replace = TRUE)
-  base_age <- round(rnorm(n_subjects, mean = 52, sd = 8), 1)
+  sex <- base::sample(c("Male", "Female"), n_subjects, replace = TRUE)
+  geno <- base::sample(c("Other Genotype", "SOD1 A4V", "SOD1 nonA4V", "C9orf72"), n_subjects, replace = TRUE)
+  base_age <- round(stats::rnorm(n_subjects, mean = 52, sd = 8), 1)
 
   out <- vector("list", n_subjects * n_visits)
   idx <- 1L
   for (i in seq_len(n_subjects)) {
     grp <- groups[i]
-    onset_year <- if (grp == "Convert") runif(1, 1.5, 6) else NA_real_
-    censor_year <- if (grp != "Convert") runif(1, 3, 8) else NA_real_
+    onset_year <- if (grp == "Convert") stats::runif(1, 1.5, 6) else NA_real_
+    censor_year <- if (grp != "Convert") stats::runif(1, 3, 8) else NA_real_
     stop_time <- if (grp == "Convert") onset_year else censor_year
     event <- if (grp == "Convert") 1L else 0L
 
-    visit_times <- sort(runif(n_visits, min = 0, max = max(1.2, stop_time - 0.2)))
+    visit_times <- sort(stats::runif(n_visits, min = 0, max = max(1.2, stop_time - 0.2)))
     for (v in seq_len(n_visits)) {
       t <- visit_times[v]
       coll_age <- base_age[i] + t
-      weight <- round(58 + 0.25 * coll_age + ifelse(sex[i] == "Male", 6, 0) + rnorm(1, 0, 2), 2)
-      height <- round(162 + ifelse(sex[i] == "Male", 10, 0) + rnorm(1, 0, 2), 2)
+      weight <- round(58 + 0.25 * coll_age + ifelse(sex[i] == "Male", 6, 0) + stats::rnorm(1, 0, 2), 2)
+      height <- round(162 + ifelse(sex[i] == "Male", 10, 0) + stats::rnorm(1, 0, 2), 2)
 
       progression <- if (grp == "Convert") t / max(onset_year, 1e-6) else t / max(censor_year, 1e-6)
       progression <- pmin(pmax(progression, 0), 1.5)
       signal <- if (grp == "Convert") 0.45 * progression else 0.08 * progression
 
-      delta1 <- round(rnorm(1, mean = signal, sd = 0.07), 3)
-      delta2 <- round(rnorm(1, mean = signal * 0.75, sd = 0.07), 3)
-      delta3 <- round(rnorm(1, mean = signal * 0.6, sd = 0.07), 3)
-      p1 <- round(6.2 + delta1 * 2.4 + rnorm(1, 0, 0.12), 3)
-      p2 <- round(5.6 + delta2 * 2.2 + rnorm(1, 0, 0.12), 3)
-      p3 <- round(5.0 + delta3 * 2.1 + rnorm(1, 0, 0.12), 3)
+      delta1 <- round(stats::rnorm(1, mean = signal, sd = 0.07), 3)
+      delta2 <- round(stats::rnorm(1, mean = signal * 0.75, sd = 0.07), 3)
+      delta3 <- round(stats::rnorm(1, mean = signal * 0.6, sd = 0.07), 3)
+      p1 <- round(6.2 + delta1 * 2.4 + stats::rnorm(1, 0, 0.12), 3)
+      p2 <- round(5.6 + delta2 * 2.2 + stats::rnorm(1, 0, 0.12), 3)
+      p3 <- round(5.0 + delta3 * 2.1 + stats::rnorm(1, 0, 0.12), 3)
 
       yrs_since_os <- if (grp == "Convert") -(onset_year - t) else NA_real_
       yrs_since_cen <- if (grp != "Convert") -(censor_year - t) else NA_real_

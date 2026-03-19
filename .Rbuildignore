@@ -1,2 +1,7 @@
 ^raw$
 ^agent-transcripts$
+^\.git$
+^\.gitignore$
+^trajSurvR\.Rcheck$
+^.*\.tar\.gz$
+^.*\.zip$

@@ -4,5 +4,7 @@
 *.Rproj.user/
 .Rhistory
 .RData
-vignettes/*.html
+# vignettes/*.html
+raw/trajSurvR_0.1.0.tar.gz
+trajSurvR.Rcheck/
 raw/

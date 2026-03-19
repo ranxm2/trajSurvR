@@ -90,7 +90,7 @@ fit_trajectory_gam <- function(
 
   r <- rle(grid$sig)
   ends <- cumsum(r$lengths)
-  starts <- c(1, head(ends, -1) + 1)
+  starts <- c(1, utils::head(ends, -1) + 1)
   nzi <- which(r$values != 0)
   intervals <- dplyr::tibble(
     start = grid[[time_col]][starts[nzi]],
