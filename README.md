@@ -26,3 +26,4 @@ Feature names in demos are intentionally generic (`protein_001`, `delta_001`, et
 If you start from legacy marker names, use `standardize_feature_names()`.
 
 See `vignettes/trajSurvR_demo.Rmd` for a full workflow demo.
+# trajSurvR
